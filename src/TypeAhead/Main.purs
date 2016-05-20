@@ -1,4 +1,4 @@
-module TypeAhead.Main where
+module Main where
 
 import Prelude (bind,id,map)
 
