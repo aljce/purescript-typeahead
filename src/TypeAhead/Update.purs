@@ -1,14 +1,17 @@
 module TypeAhead.Update where
 
-import Prelude ((<<<))
+import Prelude ((<<<),(#))
+
+import Data.Lens (view, (.~))
 
 import Pux (noEffects)
+import Pux.Html.Events (FormEvent)
+import TypeAhead.Types (StateTA,element,buildElem)
 
-import TypeAhead.States (StateTA)
+newtype ActionTA = UpdateElement FormEvent
 
-data ActionTA a = UpdateElement a
-
-simpleUpdateTA :: forall f a. ActionTA a -> StateTA f a (ActionTA a) -> StateTA f a (ActionTA a)
-simpleUpdateTA (UpdateElement newElement) state = state
+simpleUpdateTA :: forall f a. ActionTA -> StateTA f a ActionTA -> StateTA f a ActionTA 
+simpleUpdateTA (UpdateElement ev) state =
+  state # element .~ (view buildElem state ev.target.value)
 
 updateTA action = noEffects <<< (simpleUpdateTA action)

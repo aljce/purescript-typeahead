@@ -1,39 +1,58 @@
-module TypeAhead.States where
+module TypeAhead.States
+       ( testState,
+         twitterTA
+       ) where
 
-import Prelude (map)
+import Prelude hiding ((#),div,bind)
 
-import Pux.Html (Html)
+import Data.Either
+import Data.String as S
+import Data.String.Regex as R
+import Data.Array as A
+import Data.Foldable as F
 
-import Data.Lens (LensP,lens)
+import Pux
+import Pux.Html hiding (map,filter,style)
+import Pux.Html.Attributes hiding (filter,style)
+import Pux.Html.Events (onChange)
+import Pux.CSS (style)
 
-data StateTA f a act = StateTA {
-  _buildElem   :: (String -> a),
-  _element     :: a,
-  _renderElem  :: (a -> Html act),
-  _showOptions :: (a -> f a -> f (Html act)),
-  _options     :: (f a) }
+import TypeAhead.Types
+import TypeAhead.Update
+import TypeAhead.Style
 
-buildElem :: forall f a act. LensP (StateTA f a act) (String -> a)
-buildElem = lens getter setter
-  where getter (StateTA { _buildElem: bElem }) = bElem
-        setter (StateTA state) bElem = StateTA (state { _buildElem = bElem })
+testState :: StateTA Array String ActionTA
+testState = StateTA {
+  _buildElem: id,
+  _element: "Testing",
+  _renderElem: text,
+  _showOptions: (\_ opts -> map text opts),
+  _options: [ "Kyle", "James", "Andrew" ] }
 
-element :: forall f a act. LensP (StateTA f a act) a
-element = lens getter setter
-  where getter (StateTA { _element: elem }) = elem
-        setter (StateTA state) elem = StateTA (state { _element = elem })
+inputBox :: String -> Html ActionTA
+inputBox str = div # do
+  input [ type_ "text", value str, onChange UpdateElement ] []
 
-renderElem :: forall f a act. LensP (StateTA f a act) (a -> Html act)
-renderElem = lens getter setter
-  where getter (StateTA { _renderElem: rElem }) = rElem
-        setter (StateTA state) rElem = StateTA (state { _renderElem = rElem })
+search :: String -> String -> Array (Either String String)
+search substr = map toEither <<< A.filter (not <<< S.null) <<< R.split (R.regex captured flags)
+  where captured = "(" ++ substr ++ ")"
+        flags    = R.noFlags { ignoreCase = true }
+        toEither str
+          | substr == str = Right substr
+          | otherwise     = Left str
 
-showOptions :: forall f a act. LensP (StateTA f a act) (a -> f a -> f (Html act))
-showOptions = lens getter setter
-  where getter (StateTA { _showOptions: sOpts }) = sOpts
-        setter (StateTA state) sOpts = StateTA (state { _showOptions = sOpts })
+renderOptions :: String -> Array String -> Array (Html ActionTA)
+renderOptions searchStr = map toHtml <<<
+                          A.filter (F.any (either (const false) (const true))) <<<
+                          map (search searchStr)
+  where toHtml sections = span [] (map bolden sections)
+        bolden (Left normal) = span # text normal
+        bolden (Right match) = span ! style boldText # text match
 
-options :: forall f a act. LensP (StateTA f a act) (f a)
-options = lens getter setter
-  where getter (StateTA { _options: opts }) = opts
-        setter (StateTA state) opts = StateTA (state { _options = opts })
+twitterTA :: Array String -> StateTA Array String ActionTA
+twitterTA opts = StateTA {
+  _buildElem: id,
+  _element: "",
+  _renderElem: inputBox,
+  _showOptions: renderOptions,
+  _options: opts }

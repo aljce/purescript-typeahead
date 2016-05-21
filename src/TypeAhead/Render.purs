@@ -11,7 +11,7 @@ import Data.Array (singleton)
 import Pux
 import Pux.Html hiding (map,element)
 
-import TypeAhead.States
+import TypeAhead.Types
 
 renderTA :: forall f a act. (Foldable f) => StateTA f a act -> Html act
 renderTA state = do
