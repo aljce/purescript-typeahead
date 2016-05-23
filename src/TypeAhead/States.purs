@@ -38,14 +38,14 @@ search substr = map toEither <<< A.filter (not <<< S.null) <<< R.split (R.regex 
   where captured = "(" ++ substr ++ ")"
         flags    = R.noFlags { ignoreCase = true }
         toEither str
-          | substr == str = Right substr
+          | S.toLower substr == S.toLower str = Right substr
           | otherwise     = Left str
 
 renderOptions :: String -> Array String -> Array (Html ActionTA)
 renderOptions searchStr = map toHtml <<<
                           A.filter (F.any (either (const false) (const true))) <<<
                           map (search searchStr)
-  where toHtml sections = span [] (map bolden sections)
+  where toHtml sections = li [] (map bolden sections)
         bolden (Left normal) = span # text normal
         bolden (Right match) = span ! style boldText # text match
 

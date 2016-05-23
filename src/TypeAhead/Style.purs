@@ -6,4 +6,14 @@ import CSS
 
 boldText = fontWeight bold
 
+inputStyle = do
+  position relative
+  display inlineBlock
+
+optionsStyle = do
+  display block
+  position absolute
+  backgroundColor white
+
+
 
