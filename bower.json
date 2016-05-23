@@ -1,11 +1,16 @@
 {
   "name": "purescript-typeahead",
+  "license": "MIT",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "output"
   ],
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/mckeankylej/purescript-typeahead.git"
+  },
   "dependencies": {
     "purescript-console": "^0.1.0",
     "purescript-pux": "^4.1.0",
