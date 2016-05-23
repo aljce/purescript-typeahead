@@ -14,4 +14,4 @@ simpleUpdateTA :: forall f a. ActionTA -> StateTA f a ActionTA -> StateTA f a Ac
 simpleUpdateTA (UpdateElement ev) state =
   state # element .~ (view buildElem state ev.target.value)
 
-updateTA action = noEffects <<< (simpleUpdateTA action)
+updateTA action = noEffects <<< simpleUpdateTA action
